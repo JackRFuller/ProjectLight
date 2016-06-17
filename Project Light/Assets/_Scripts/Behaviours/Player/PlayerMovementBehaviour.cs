@@ -34,12 +34,8 @@ public class PlayerMovementBehaviour : C_HumanoidMovement
         //Define TargetPosition
         m_targetPosition = InputController.Instance.WaypointPosition;
 
-        Debug.Log(m_targetPosition);
-
         //Ignore Height of Waypoint
         m_targetPosition.y = transform.position.y;
-
-        Debug.Log(m_targetPosition);
 
         //Calculate Direction Vector
         Vector3 _direction = (m_targetPosition - transform.position).normalized * m_MovementSpeed;
@@ -49,8 +45,6 @@ public class PlayerMovementBehaviour : C_HumanoidMovement
 
         //Start Moving
         m_isMoving = true;
-
-        Debug.Log("Initiate");
     }
 
     void Update()

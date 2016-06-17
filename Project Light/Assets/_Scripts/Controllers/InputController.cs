@@ -35,6 +35,7 @@ public class InputController : C_Singleton<InputController>
         if(Input.touchCount > 0)
         {
             Vector2 _touchPos = Input.GetTouch(0).position;
+            SendOutRayCast(_touchPos);
         }
     }
 
@@ -49,9 +50,8 @@ public class InputController : C_Singleton<InputController>
             if(_hit.collider.tag == "Platform")
             {
                 m_waypointPosition = _hit.point;
-                Debug.Log(_hit.point);
-                m_waypointPosition.z = 0;
-                Debug.Log(m_waypointPosition);
+                
+                m_waypointPosition.z = 0; //Make sure the target position z is always 0
 
                 //Start triggering player movement
                 if(MovementTriggered != null)
