@@ -100,19 +100,10 @@ public class PlayerMovementBehaviour : C_HumanoidMovement
         m_isMoving = false;
     }
 
-    //void OnTriggerEnter(Collider other)
-    //{
-    //    if (other.tag == "Platform")
-    //    {
-    //        transform.parent = other.transform;
-    //    }
-    //}
-
-
-
     bool CheckOnSamePlane()
     {
-        float _playersRotation = Quaternion.Angle(transform.rotation, Quaternion.identity);
+        float _playersRotation = GetPlayersRotation();
+
         Debug.Log(_playersRotation);
 
         if (_playersRotation == 0.0f || _playersRotation == 180.0f)
@@ -138,10 +129,29 @@ public class PlayerMovementBehaviour : C_HumanoidMovement
 
     bool IgnoreY()
     {
-        float _playersRotation = Quaternion.Angle(transform.rotation, Quaternion.identity);
+        float _playersRotation = GetPlayersRotation();
 
         if (_playersRotation == 0.0f || _playersRotation == 180.0f)
             return true;
         else return false;
+    }
+
+    void RoundRotation()
+    {
+        //transform.rotation = Mathf.Round(GetPlayersRotation());
+    }
+
+    float GetPlayersRotation()
+    {
+        float _playersRotation = Mathf.Abs(Quaternion.Angle(transform.rotation, Quaternion.identity));
+        return _playersRotation;
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "Platform")
+        {
+            transform.parent = other.transform.parent;
+        }
     }
 }

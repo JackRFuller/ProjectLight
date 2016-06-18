@@ -21,7 +21,8 @@ public class RotatingPlatformBehaviour : PlatformBehaviour
 
     void ActivateBehaviour()
     {
-        InitiateRotation();
+        if(!m_isRotating) //Check that the platform isn't already rotating
+            InitiateRotation();
     }
 
     void InitiateRotation()
