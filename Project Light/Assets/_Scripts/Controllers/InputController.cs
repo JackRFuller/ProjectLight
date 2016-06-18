@@ -14,6 +14,18 @@ public class InputController : C_Singleton<InputController>
         get { return m_waypointPosition; }
     }
 
+    [Header("Input")]
+    [SerializeField] private float m_TimeToAllowForDoubleTap;
+
+    private bool m_hasDoubleTapped;
+    public bool HasDoubleTapped
+    {
+        get { return m_hasDoubleTapped; }
+    }
+
+    private bool m_singleClick;   
+    private float m_TimeForDoubleTap;
+
     public static event Action MovementTriggered;
 
     void Update()
@@ -23,10 +35,20 @@ public class InputController : C_Singleton<InputController>
 
     void DetectMouseInput()
     {
-        if (Input.GetMouseButtonUp(0))
+        if (Input.GetMouseButtonDown(0))
         {
+            ReigsterDoubleTap();
+    
             Vector2 _mousePos = Input.mousePosition;            
             SendOutRayCast(_mousePos);
+        }
+
+        if (m_singleClick)
+        {
+            if((Time.time - m_TimeForDoubleTap) > m_TimeToAllowForDoubleTap)
+            {
+                m_singleClick = false;
+            }
         }
     }
 
@@ -34,8 +56,35 @@ public class InputController : C_Singleton<InputController>
     {
         if(Input.touchCount > 0)
         {
+            ReigsterDoubleTap();
+
             Vector2 _touchPos = Input.GetTouch(0).position;
             SendOutRayCast(_touchPos);
+        }
+
+        if (m_singleClick)
+        {
+            if ((Time.time - m_TimeForDoubleTap) > m_TimeToAllowForDoubleTap)
+            {
+                m_singleClick = false;
+            }
+        }
+    }
+
+    void ReigsterDoubleTap()
+    {
+        if (!m_singleClick)
+        {
+            m_singleClick = true;
+
+            m_TimeForDoubleTap = Time.time;
+
+            m_hasDoubleTapped = false;
+        }
+        else
+        {
+            m_singleClick = false; //Has Double Clicked
+            m_hasDoubleTapped = true;
         }
     }
 
@@ -47,16 +96,27 @@ public class InputController : C_Singleton<InputController>
 
         if(Physics.Raycast(_ray, out _hit, Mathf.Infinity))
         {
-            if(_hit.collider.tag == "Platform")
+            if (_hit.collider.tag == "Platform")
             {
                 m_waypointPosition = _hit.point;
-                
+
                 m_waypointPosition.z = 0; //Make sure the target position z is always 0
 
                 //Start triggering player movement
-                if(MovementTriggered != null)
-                    MovementTriggered(); 
+                if (MovementTriggered != null)
+                    MovementTriggered();
+            }
+            else
+            {
+                _hit.transform.SendMessage("HitByInput", SendMessageOptions.DontRequireReceiver);
             }
         }
     }
+
+    //void RegisterDoubleTap()
+    //{
+    //    m_hasDoubleTapped = true;
+
+    //    Debug.Log("DoubleClick");
+    //}
 }
