@@ -9,8 +9,8 @@ public class RotatingPlatformBehaviour : PlatformBehaviour
     [SerializeField] private float m_RotationSpeed;
     [SerializeField] private float m_RotationIncremements; //Determines how much the platform rotates each time
 
-    private Vector3 initialRotation;
-    private Vector3 targetRotation;
+    private Quaternion initialRotation;
+    private Quaternion targetRotation;
     private float timeStartedLerping;
     [SerializeField] private AnimationCurve m_RotationCurve;
     
@@ -26,14 +26,11 @@ public class RotatingPlatformBehaviour : PlatformBehaviour
 
     void InitiateRotation()
     {
-        initialRotation = transform.localEulerAngles;
+        initialRotation = transform.rotation;
 
         targetRotation = initialRotation;
 
-        targetRotation.z += m_RotationIncremements; 
-
-        //Debug.Log(initialRotation);
-        //Debug.Log(targetRotation);
+        targetRotation *= Quaternion.Euler(0, 0, m_RotationIncremements);
 
         m_isRotating = true;
         timeStartedLerping = Time.time;
@@ -47,18 +44,21 @@ public class RotatingPlatformBehaviour : PlatformBehaviour
 
     void RotatePlatform()
     {
-        Quaternion _startRotation = Quaternion.Euler(initialRotation);
-        Quaternion _targetRotation = Quaternion.Euler(targetRotation);
-
         float _timeSinceStarted = Time.time - timeStartedLerping;
         float _percentageComplete = _timeSinceStarted / m_RotationSpeed;
 
-        transform.rotation = Quaternion.Slerp(_startRotation, _targetRotation, m_RotationCurve.Evaluate(_percentageComplete));
+        transform.rotation = Quaternion.Slerp(initialRotation, targetRotation, m_RotationCurve.Evaluate(_percentageComplete));
 
         if(_percentageComplete >= 1)
         {
-            m_isRotating = false;
+            StopRotation();
         }
+    }
+
+    void StopRotation()
+    {
+        m_isRotating = false;
+        //transform.rotation = targetRotation;
     }
 	
 }

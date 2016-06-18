@@ -28,19 +28,19 @@ public class PlayerMovementBehaviour : C_HumanoidMovement
 
     void InitiateMovement()
     {
-        //Reset Speed
-        //StopMovement();
+        
 
         //Define TargetPosition
         m_targetPosition = InputController.Instance.WaypointPosition;
 
-        Debug.Log(transform.eulerAngles);
+        if (!CheckOnSamePlane())
+            return;
 
         //Determine Player's Rotation
         bool _ignoreY = IgnoreY();
 
         if (!_ignoreY)
-            m_targetPosition.x = transform.position.x;
+            m_targetPosition.x = transform.position.x; //Ignore X of Waypoint
         else      
             m_targetPosition.y = transform.position.y;  //Ignore Height of Waypoint
 
@@ -100,24 +100,48 @@ public class PlayerMovementBehaviour : C_HumanoidMovement
         m_isMoving = false;
     }
 
-    void OnTriggerEnter(Collider other)
+    //void OnTriggerEnter(Collider other)
+    //{
+    //    if (other.tag == "Platform")
+    //    {
+    //        transform.parent = other.transform;
+    //    }
+    //}
+
+
+
+    bool CheckOnSamePlane()
     {
-        if (other.tag == "Platform")
+        float _playersRotation = Quaternion.Angle(transform.rotation, Quaternion.identity);
+        Debug.Log(_playersRotation);
+
+        if (_playersRotation == 0.0f || _playersRotation == 180.0f)
         {
-            transform.parent = other.transform;
+            float _targetY = Mathf.Abs(m_targetPosition.y);
+            float _playerY = Mathf.Abs(transform.position.y);
+
+            if ((_targetY <= _playerY + 0.5f) && (_targetY >= _playerY - 0.5f))
+                return true;
         }
+        if (_playersRotation == 90.0f || _playersRotation == 270.0f)
+        {
+            float _targetX = Mathf.Abs(m_targetPosition.x);
+            float _playerX = Mathf.Abs(transform.position.x);
+
+            if ((_targetX <= _playerX + 0.5f) && (_targetX >= _playerX - 0.5f))
+                return true;
+        }
+
+        return false;
+
     }
 
     bool IgnoreY()
     {
-        if (transform.eulerAngles.z == 0 || transform.eulerAngles.z == 180.0f)
-        {
+        float _playersRotation = Quaternion.Angle(transform.rotation, Quaternion.identity);
+
+        if (_playersRotation == 0.0f || _playersRotation == 180.0f)
             return true;
-        }
-        else if(transform.eulerAngles.z == 90 || transform.eulerAngles.z == 270)
-        {
-            return false;
-        }
-        return true;
+        else return false;
     }
 }

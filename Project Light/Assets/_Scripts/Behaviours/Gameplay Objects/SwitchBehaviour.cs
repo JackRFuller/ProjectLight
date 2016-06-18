@@ -3,7 +3,6 @@ using System.Collections;
 
 public class SwitchBehaviour : MonoBehaviour
 {
-
     [SerializeField] private Transform m_target;
 
 	void HitByInput()
