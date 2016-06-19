@@ -12,6 +12,12 @@ public class PlayerMovementBehaviour : C_HumanoidMovement
     private float lastSquareMagnitude;
     private Vector3 m_desiredVelocity;
 
+    public static float m_playersRotation;
+    public static float PlayersRotation
+    {
+        get { return m_playersRotation; }
+    }
+
     void Start()
     {
         Init();
@@ -20,21 +26,26 @@ public class PlayerMovementBehaviour : C_HumanoidMovement
     void Init()
     {
         //Subscribe To Input Controller
-        InputController.MovementTriggered += InitiateMovement;
+        //InputController.MovementTriggered += InitiateMovement;
+
+        //MovementController.GeneratedActivePath += InitiateMovement;
+
+        PathFindingController.FoundValidPath += InitiateMovement;
 
         //Cache Components
         rb = GetComponent<Rigidbody>();
+
+        m_playersRotation = Mathf.Round(GetPlayersRotation());
+        Debug.Log("Player Rotation " + m_playersRotation);
     }
 
     void InitiateMovement()
     {
-        
-
         //Define TargetPosition
         m_targetPosition = InputController.Instance.WaypointPosition;
 
-        if (!CheckOnSamePlane())
-            return;
+        //if (!CheckOnSamePlane())
+        //    return;
 
         //Determine Player's Rotation
         bool _ignoreY = IgnoreY();
@@ -100,32 +111,30 @@ public class PlayerMovementBehaviour : C_HumanoidMovement
         m_isMoving = false;
     }
 
-    bool CheckOnSamePlane()
-    {
-        float _playersRotation = GetPlayersRotation();
+    //bool CheckOnSamePlane()
+    //{
+    //    float _playersRotation = Mathf.Round(GetPlayersRotation());        
 
-        Debug.Log(_playersRotation);
+    //    if (_playersRotation == 0.0f || _playersRotation == 180.0f)
+    //    {
+    //        float _targetY = Mathf.Abs(m_targetPosition.y);
+    //        float _playerY = Mathf.Abs(transform.position.y);
 
-        if (_playersRotation == 0.0f || _playersRotation == 180.0f)
-        {
-            float _targetY = Mathf.Abs(m_targetPosition.y);
-            float _playerY = Mathf.Abs(transform.position.y);
+    //        if ((_targetY <= _playerY + 0.5f) && (_targetY >= _playerY - 0.5f))
+    //            return true;
+    //    }
+    //    if (_playersRotation == 90.0f || _playersRotation == 270.0f)
+    //    {
+    //        float _targetX = Mathf.Abs(m_targetPosition.x);
+    //        float _playerX = Mathf.Abs(transform.position.x);
 
-            if ((_targetY <= _playerY + 0.5f) && (_targetY >= _playerY - 0.5f))
-                return true;
-        }
-        if (_playersRotation == 90.0f || _playersRotation == 270.0f)
-        {
-            float _targetX = Mathf.Abs(m_targetPosition.x);
-            float _playerX = Mathf.Abs(transform.position.x);
+    //        if ((_targetX <= _playerX + 0.5f) && (_targetX >= _playerX - 0.5f))
+    //            return true;
+    //    }
 
-            if ((_targetX <= _playerX + 0.5f) && (_targetX >= _playerX - 0.5f))
-                return true;
-        }
+    //    return false;
 
-        return false;
-
-    }
+    //}
 
     bool IgnoreY()
     {
@@ -141,9 +150,10 @@ public class PlayerMovementBehaviour : C_HumanoidMovement
         //transform.rotation = Mathf.Round(GetPlayersRotation());
     }
 
-    float GetPlayersRotation()
+    public float GetPlayersRotation()
     {
         float _playersRotation = Mathf.Abs(Quaternion.Angle(transform.rotation, Quaternion.identity));
+        m_playersRotation = _playersRotation;
         return _playersRotation;
     }
 
@@ -151,7 +161,7 @@ public class PlayerMovementBehaviour : C_HumanoidMovement
     {
         if (other.tag == "Platform")
         {
-            transform.parent = other.transform.parent;
+            transform.parent = other.transform.parent.parent;
         }
     }
 }

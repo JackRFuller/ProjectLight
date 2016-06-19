@@ -59,6 +59,7 @@ public class RotatingPlatformBehaviour : PlatformBehaviour
     void StopRotation()
     {
         m_isRotating = false;
+        MovementController.Instance.AssembleNodes();
         //transform.rotation = targetRotation;
     }
 	

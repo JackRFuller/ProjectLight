@@ -94,7 +94,7 @@ public class InputController : C_Singleton<InputController>
 
         RaycastHit _hit;
 
-        if(Physics.Raycast(_ray, out _hit, Mathf.Infinity))
+        if (Physics.Raycast(_ray, out _hit, Mathf.Infinity))
         {
             if (_hit.collider.tag == "Platform")
             {
@@ -103,7 +103,7 @@ public class InputController : C_Singleton<InputController>
                 m_waypointPosition.z = 0; //Make sure the target position z is always 0
 
                 //Start triggering player movement
-                if (MovementTriggered != null)
+               if(MovementTriggered != null)
                     MovementTriggered();
             }
             else
