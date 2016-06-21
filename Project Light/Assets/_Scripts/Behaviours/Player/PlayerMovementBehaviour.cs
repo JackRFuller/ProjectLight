@@ -36,7 +36,7 @@ public class PlayerMovementBehaviour : C_HumanoidMovement
         rb = GetComponent<Rigidbody>();
 
         m_playersRotation = Mathf.Round(GetPlayersRotation());
-        Debug.Log("Player Rotation " + m_playersRotation);
+        //Debug.Log("Player Rotation " + m_playersRotation);
     }
 
     void InitiateMovement()

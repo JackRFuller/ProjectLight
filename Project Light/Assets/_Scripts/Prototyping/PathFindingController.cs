@@ -27,7 +27,7 @@ public class PathFindingController : C_Singleton<PathFindingController>
         InputController.MovementTriggered += BuildPathToTarget;
     }
 
-    void AssembleNodeLists()
+    public void AssembleNodeLists()
     {
         //Clear Lists
         nodeLocalPositions.Clear();
@@ -59,6 +59,10 @@ public class PathFindingController : C_Singleton<PathFindingController>
 
         m_targetPosition = InputController.Instance.WaypointPosition; //Get Target Position
 
+        //Check that Target Position is on the same plane as the PC
+        if (!isTargetOnTheSamePlaneAsThePlayer())
+            return;
+
         //Work out the difference between the PC and the TargetPosition.
         float _differenceBetweenPCAndTarget = GetDifferenceBetweenTargetAndPC();
         Debug.Log("Difference Between PC & Target: " + _differenceBetweenPCAndTarget);
@@ -67,13 +71,13 @@ public class PathFindingController : C_Singleton<PathFindingController>
         _differenceBetweenPCAndTarget = Mathf.Round(_differenceBetweenPCAndTarget);
         Debug.Log("Rounded Difference " +_differenceBetweenPCAndTarget);
 
-        //Identify if we're cycling left or right
+        //Identify if we're cycling left or right/up or down
         bool _isPositive = GetIfDifferenceIsPositive(_differenceBetweenPCAndTarget);
 
         //Get Absolute Value of The Difference
         float _numberOfPotentialNodes = Mathf.Abs(_differenceBetweenPCAndTarget);
 
-        float _targetNodeY = _startingNode.position.y; //Ignores the Height of the Nodes
+        
 
         int _numberOfNodesToTarget = 0;
 
@@ -83,18 +87,33 @@ public class PathFindingController : C_Singleton<PathFindingController>
         for (int i = 0; i < _numberOfPotentialNodes; i++)
         {
             float _targetNodeX = 0;
+            float _targetNodeY = 0;
 
-            if (_isPositive)
-                _targetNodeX = _startingNode.position.x + (i + 1);
-            else _targetNodeX = _startingNode.position.x + (-i - 1);
+            //Determine the player's rounded orientation
+            float _playersOrientation = Mathf.Round(GetPlayerRotation());
+
+            if (_playersOrientation == 0 || _playersOrientation == 180)
+            {
+                _targetNodeY = _startingNode.position.y; //Ignores the Height of the Nodes
+
+                if (_isPositive)
+                    _targetNodeX = _startingNode.position.x + (i + 1);
+                else _targetNodeX = _startingNode.position.x + (-i - 1);
+            }
+            else
+            {
+                _targetNodeX = _startingNode.position.x; //Ignores the left & right of the Nodes
+
+                if (_isPositive) //If we're going up
+                    _targetNodeY = _startingNode.position.y + (i + 1);
+                else //if we're going down
+                    _targetNodeY = _startingNode.position.y + (-i - 1);
+            }           
 
             Vector3 _targetNodePosition = new Vector3(_targetNodeX, _targetNodeY, 0);        
 
             Debug.Log("Target Node Position " +_targetNodePosition);
-
-            int _nodeIndex1 = nodeWorldPositions.FindIndex(d => d == _targetNodePosition);
-            Debug.Log("Node Index" + _nodeIndex1);
-
+           
             //Check if node is present
             if (nodeWorldPositions.Exists(d => d == _targetNodePosition))
             {
@@ -122,6 +141,44 @@ public class PathFindingController : C_Singleton<PathFindingController>
 
     }
 
+    bool isTargetOnTheSamePlaneAsThePlayer()
+    {
+        float _playerRotation = Mathf.Round(GetPlayerRotation());        
+        Debug.Log("Player's Rotation " + _playerRotation);
+
+        if(_playerRotation == 90 || _playerRotation == 270)
+        {
+            float _playerX = Mathf.Abs(PC.transform.position.x);
+            float _targetX = Mathf.Abs(m_targetPosition.x);
+
+            if(_targetX <= _playerX + 1.0f && _targetX >= _playerX - 1.0f)
+            {
+                return true;
+            }            
+        }
+        else if(_playerRotation == 0 || _playerRotation == 180)
+        {
+            float _playerY = Mathf.Abs(PC.transform.position.y);
+            float _targetY = Mathf.Abs(m_targetPosition.y);
+
+            if(_targetY <= _playerY + 1.0f && _targetY >= _playerY - 1.0f)
+            {
+                return true;
+            }            
+        }
+
+        Debug.Log("Not on Same Plane");
+
+        return false;
+    }
+
+    float GetPlayerRotation()
+    {
+        float _playerRotation = 0;
+        _playerRotation = Mathf.Abs(Quaternion.Angle(PC.rotation, Quaternion.identity));
+        return _playerRotation;
+    }
+
     bool GetIfDifferenceIsPositive(float _value) //Get if the player is moving left/right or up/down
     {
         if (_value > 0)
@@ -132,8 +189,18 @@ public class PathFindingController : C_Singleton<PathFindingController>
 
     float GetDifferenceBetweenTargetAndPC()
     {
+        float _playerRotation = Mathf.Round(GetPlayerRotation());
+
         float _difference = 0;
-        _difference = m_targetPosition.x - PC.transform.position.x;
+
+        if (_playerRotation == 90 || _playerRotation == 270)
+        {
+            _difference = m_targetPosition.y - PC.transform.position.y;
+        }
+        else
+        {
+            _difference = m_targetPosition.x - PC.transform.position.x;
+        }
 
         return _difference;
     }    
