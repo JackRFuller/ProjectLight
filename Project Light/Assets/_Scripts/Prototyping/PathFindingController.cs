@@ -14,6 +14,7 @@ public class PathFindingController : C_Singleton<PathFindingController>
     private Vector3 m_targetPosition;
 
     public static event Action FoundValidPath;
+    public static event Action HasPathNodes; //Called when the controller has all of the nodes
 
     void Start()
     {
@@ -48,6 +49,9 @@ public class PathFindingController : C_Singleton<PathFindingController>
                                                 Mathf.Round(nodeWorldPositions[i].y),
                                                 Mathf.Round(nodeWorldPositions[i].z));
         }
+
+        if (HasPathNodes != null)
+            HasPathNodes();
     }
 
     void BuildPathToTarget()
